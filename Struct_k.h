@@ -1,5 +1,5 @@
-#ifndef STRUCT_KB_H
-#define STRUCT_KB_H
+#ifndef STRUCT_K_H
+#define STRUCT_K_H
 
 #include "Incl_std.h"
 #include "Def_kb.h"
@@ -19,4 +19,4 @@ typedef struct
     uint8_t queue_tail;
 } Keyboard_t;
 
-#endif /* STRUCT_KB_H */
+#endif /* STRUCT_K_H */
