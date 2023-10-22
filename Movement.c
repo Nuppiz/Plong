@@ -3,13 +3,14 @@
 #include "Def_gen.h"
 #include "Def_game.h"
 #include "Struct_g.h"
+#include "Draw.h"
 #include "Game.h"
 
 /* Movement and collision */
 
 extern Gamedata_t Game;
 
-void paddleMove(Paddle_t* paddle)
+void paddleMove(Paddle_t* paddle, uint8_t move_type)
 {
     if ((paddle->movement_bits & CONTROL_UP) && paddle->vel.y > -PADDLE_MAX_SPEED)
         paddle->vel.y -= PADDLE_ACCELERATION_RATE;
@@ -20,8 +21,13 @@ void paddleMove(Paddle_t* paddle)
     if ((paddle->movement_bits & CONTROL_RIGHT) && paddle->vel.x < PADDLE_MAX_SPEED)
         paddle->vel.x += PADDLE_ACCELERATION_RATE;
 
-    paddle->pos.x += paddle->vel.x;
-    paddle->pos.y += paddle->vel.y;
+    if (move_type != AI_SERVE)
+    {   paddle->prev_pos.x = paddle->current_pos.x;
+        paddle->prev_pos.y = paddle->current_pos.y;
+    }
+
+    paddle->current_pos.x += paddle->vel.x;
+    paddle->current_pos.y += paddle->vel.y;
 }
 
 void ballPaddleDetect(Ball_t* ball)
@@ -32,8 +38,8 @@ void ballPaddleDetect(Ball_t* ball)
     if (ball->vel.x < 0) // left paddle
     {
         paddle = &Game.Paddles[0];
-        y_diff = paddle->pos.y - ball->pos.y;
-        x_diff = ball->pos.x - paddle->pos.x;
+        y_diff = paddle->current_pos.y - ball->current_pos.y;
+        x_diff = ball->current_pos.x - paddle->current_pos.x;
         if (y_diff >= -PADDLE_HEIGHT_HALF && y_diff <= PADDLE_HEIGHT_HALF)
         {
             if (x_diff <= BALL_RADIUS && x_diff >= -BALL_RADIUS)
@@ -49,8 +55,8 @@ void ballPaddleDetect(Ball_t* ball)
     else if (ball->vel.x > 0) // right paddle
     {
         paddle = &Game.Paddles[1];
-        y_diff = paddle->pos.y - ball->pos.y;
-        x_diff = paddle->pos.x - ball->pos.x;
+        y_diff = paddle->current_pos.y - ball->current_pos.y;
+        x_diff = paddle->current_pos.x - ball->current_pos.x;
         if (y_diff >= -PADDLE_HEIGHT_HALF && y_diff <= PADDLE_HEIGHT_HALF)
         {
             if (x_diff <= BALL_RADIUS && x_diff >= -BALL_RADIUS)
@@ -67,21 +73,30 @@ void ballPaddleDetect(Ball_t* ball)
 
 void ballMove(Ball_t* ball)
 {
-    ball->pos.x += ball->vel.x;
-    ball->pos.y += ball->vel.y;
+    int paddle_detect_x;
+    int paddle_detect_y;
+
+    ball->prev_pos.x = ball->current_pos.x;
+    ball->prev_pos.y = ball->current_pos.y;
+
+    ball->current_pos.x += ball->vel.x;
+    ball->current_pos.y += ball->vel.y;
 }
 
 void ballHold(Ball_t* ball)
 {
+    ball->prev_pos.x = ball->current_pos.x;
+    ball->prev_pos.y = ball->current_pos.y;
+
     if (Game.current_server == LEFT)
     {
-        ball->pos.x = Game.Paddles[0].pos.x + BALL_DIAMETER;
-        ball->pos.y = Game.Paddles[0].pos.y;
+        ball->current_pos.x = Game.Paddles[0].current_pos.x + BALL_DIAMETER;
+        ball->current_pos.y = Game.Paddles[0].current_pos.y;
     }
     else if (Game.current_server == RIGHT)
     {
-        ball->pos.x = Game.Paddles[1].pos.x - BALL_DIAMETER;
-        ball->pos.y = Game.Paddles[1].pos.y;
+        ball->current_pos.x = Game.Paddles[1].current_pos.x - BALL_DIAMETER;
+        ball->current_pos.y = Game.Paddles[1].current_pos.y;
     }
 }
 
@@ -103,39 +118,39 @@ void ballServe()
 
 void paddleEdgeDetect(Paddle_t* paddle)
 {
-    if (paddle->pos.x - PADDLE_WIDTH_HALF <= 0) // left edge
+    if (paddle->current_pos.x - PADDLE_WIDTH_HALF <= 0) // left edge
     {
-        paddle->pos.x = 0 + PADDLE_WIDTH_HALF;
+        paddle->current_pos.x = 0 + PADDLE_WIDTH_HALF;
         paddle->vel.x = 0;
     }
-    if (paddle->pos.y - PADDLE_HEIGHT_HALF <= 0) // top edge
+    if (paddle->current_pos.y - PADDLE_HEIGHT_HALF <= 0) // top edge
     {
-        paddle->pos.y = 0 + PADDLE_HEIGHT_HALF;
+        paddle->current_pos.y = 0 + PADDLE_HEIGHT_HALF;
         paddle->vel.y = 0;
     }
-    if (paddle->pos.x + PADDLE_WIDTH_HALF >= COURT_WIDTH) // right edge
+    if (paddle->current_pos.x + PADDLE_WIDTH_HALF >= COURT_WIDTH) // right edge
     {
-        paddle->pos.x = COURT_WIDTH - PADDLE_WIDTH_HALF;
+        paddle->current_pos.x = COURT_WIDTH - PADDLE_WIDTH_HALF;
         paddle->vel.x = 0;
     }
-    if (paddle->pos.y + PADDLE_HEIGHT_HALF >= COURT_HEIGHT) // bottom edge
+    if (paddle->current_pos.y + PADDLE_HEIGHT_HALF >= COURT_HEIGHT) // bottom edge
     {
-        paddle->pos.y = COURT_HEIGHT - PADDLE_HEIGHT_HALF;
+        paddle->current_pos.y = COURT_HEIGHT - PADDLE_HEIGHT_HALF;
         paddle->vel.y = 0;
     }
     if (paddle->side == LEFT)
     {
-        if (paddle->pos.x + PADDLE_WIDTH_HALF >= COURT_WIDTH / 2) // middle line
+        if (paddle->current_pos.x + PADDLE_WIDTH_HALF >= COURT_WIDTH / 2) // middle line
         {
-            paddle->pos.x = COURT_WIDTH / 2 - PADDLE_WIDTH_HALF;
+            paddle->current_pos.x = COURT_WIDTH / 2 - PADDLE_WIDTH_HALF;
             paddle->vel.x = 0;
         }
     }
     else if (paddle->side == RIGHT)
     {
-        if (paddle->pos.x - PADDLE_WIDTH_HALF <= COURT_WIDTH / 2) // middle line
+        if (paddle->current_pos.x - PADDLE_WIDTH_HALF <= COURT_WIDTH / 2) // middle line
         {
-            paddle->pos.x = COURT_WIDTH / 2 + PADDLE_WIDTH_HALF;
+            paddle->current_pos.x = COURT_WIDTH / 2 + PADDLE_WIDTH_HALF;
             paddle->vel.x = 0;
         }
     }
@@ -143,18 +158,18 @@ void paddleEdgeDetect(Paddle_t* paddle)
 
 int ballEdgeDetect(Ball_t* ball)
 {
-    if (ball->pos.x <= 0) // left edge
+    if (ball->current_pos.x <= 0) // left edge
         return RIGHT_SCORES;
-    if (ball->pos.x >= COURT_WIDTH) // right edge
+    if (ball->current_pos.x >= COURT_WIDTH) // right edge
         return LEFT_SCORES;
-    if (ball->pos.y - BALL_RADIUS <= 0) // top edge
+    if (ball->current_pos.y - BALL_RADIUS <= 0) // top edge
     {
-        ball->pos.y = 0 + BALL_RADIUS;
+        ball->current_pos.y = 0 + BALL_RADIUS;
         ball->vel.y = -ball->vel.y;
     }
-    if (ball->pos.y + BALL_RADIUS >= COURT_HEIGHT) // bottom edge
+    if (ball->current_pos.y + BALL_RADIUS >= COURT_HEIGHT) // bottom edge
     {
-        ball->pos.y = COURT_HEIGHT - BALL_RADIUS;
+        ball->current_pos.y = COURT_HEIGHT - BALL_RADIUS;
         ball->vel.y = -ball->vel.y;
     }
     return 0;
@@ -167,21 +182,21 @@ static void AIThink(Paddle_t* ai_paddle)
     {
         if (ball->vel.x < 0)
         {
-            if (ball->pos.y < ai_paddle->pos.y)
+            if (ball->current_pos.y < ai_paddle->current_pos.y)
             {
                 ai_paddle->movement_bits &= ~CONTROL_DOWN;
                 ai_paddle->movement_bits |= CONTROL_UP;
                 if (ai_paddle->vel.y > 0)
                     ai_paddle->vel.y = 0;
             }
-            if (ball->pos.y > ai_paddle->pos.y)
+            if (ball->current_pos.y > ai_paddle->current_pos.y)
             {
                 ai_paddle->movement_bits &= ~CONTROL_UP;
                 ai_paddle->movement_bits |= CONTROL_DOWN;
                 if (ai_paddle->vel.y < 0)
                     ai_paddle->vel.y = 0;
             }
-            /*if (ball->pos.x < COURT_WIDTH / 2 && ai_paddle->pos.x < COURT_WIDTH / 6)
+            /*if (ball->current_pos.x < COURT_WIDTH / 2 && ai_paddle->current_pos.x < COURT_WIDTH / 6)
             {
                 ai_paddle->movement_bits &= ~CONTROL_LEFT;
                 ai_paddle->movement_bits |= CONTROL_RIGHT;
@@ -197,21 +212,21 @@ static void AIThink(Paddle_t* ai_paddle)
     {
         if (ball->vel.x > 0)
         {
-            if (ball->pos.y < ai_paddle->pos.y)
+            if (ball->current_pos.y < ai_paddle->current_pos.y)
             {
                 ai_paddle->movement_bits &= ~CONTROL_DOWN;
                 ai_paddle->movement_bits |= CONTROL_UP;
                 if (ai_paddle->vel.y > 0)
                     ai_paddle->vel.y = 0;
             }
-            if (ball->pos.y > ai_paddle->pos.y)
+            if (ball->current_pos.y > ai_paddle->current_pos.y)
             {
                 ai_paddle->movement_bits &= ~CONTROL_UP;
                 ai_paddle->movement_bits |= CONTROL_DOWN;
                 if (ai_paddle->vel.y < 0)
                     ai_paddle->vel.y = 0;
             }
-            /*if (ball->pos.x > COURT_WIDTH / 2 && ai_paddle->pos.x > COURT_WIDTH - (COURT_WIDTH / 6))
+            /*if (ball->current_pos.x > COURT_WIDTH / 2 && ai_paddle->current_pos.x > COURT_WIDTH - (COURT_WIDTH / 6))
             {
                 ai_paddle->movement_bits &= ~CONTROL_RIGHT;
                 ai_paddle->movement_bits |= CONTROL_LEFT;
@@ -231,6 +246,9 @@ static void AIServe(Paddle_t* ai_paddle)
     int movement_time = (rand() % 25);
     int timer;
 
+    ai_paddle->prev_pos.x = ai_paddle->current_pos.x;
+    ai_paddle->prev_pos.y = ai_paddle->current_pos.y;
+
     ai_paddle->movement_bits = 0;
     ai_paddle->vel.x = 0;
     ai_paddle->vel.y = 0;
@@ -242,11 +260,11 @@ static void AIServe(Paddle_t* ai_paddle)
 
     for (timer = 0; timer < movement_time; timer++)
     {
-        paddleMove(ai_paddle);
+        paddleMove(ai_paddle, AI_SERVE);
     }
 
     delay(500);
-
+    redrawField(ai_paddle->prev_pos.x, ai_paddle->prev_pos.y, PADDLE);
     ballServe();
 }
 
@@ -282,7 +300,7 @@ void physics()
     while (i < NUM_PADDLES)
     {
         Paddle_t* paddle = &Game.Paddles[i];
-        paddleMove(paddle);
+        paddleMove(paddle, NORMAL_MOVE);
         paddleEdgeDetect(paddle);
         i++;
     }

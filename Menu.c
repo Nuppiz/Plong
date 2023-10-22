@@ -1,3 +1,5 @@
+
+#include "Def_draw.h"
 #include "Def_game.h"
 #include "Def_gen.h"
 #include "Def_kb.h"
@@ -16,6 +18,7 @@ void gameOver(uint8_t winner)
 {
     while (!KEY_WAS_HIT(KEY_ESC))
     {
+        drawField(COLOR_COURT_RED, COLOR_WHITE);
         drawLoop();
         drawRectangle(80, 50, 160, 10, COLOR_BLACK);
         if (winner == LEFT_WINS)
@@ -33,10 +36,10 @@ void sideSelect(uint8_t game_mode)
 
     while (selection == FALSE)
     {
+        render();
         drawText(1, 1, "Select your side:\n"
                     "1) Left\n"
                     "2) Right\n", COLOR_WHITE);
-
         if (KEY_WAS_HIT(KEY_1))
         {
             gameInit(game_mode, LEFT);
@@ -47,7 +50,6 @@ void sideSelect(uint8_t game_mode)
             gameInit(game_mode, RIGHT);
             selection = TRUE;
         }
-        render();
     }
 }
 
@@ -60,7 +62,9 @@ void modeSelect()
                     "4) Exit game", COLOR_WHITE);
 
     if (KEY_WAS_HIT(KEY_1))
+    {
         sideSelect(SINGLE_PLAYER);
+    }
     else if (KEY_WAS_HIT(KEY_2))
         gameInit(TWO_PLAYER, LEFT);
     else if (KEY_WAS_HIT(KEY_3))
@@ -76,6 +80,7 @@ int newGame()
 
     while (selection == FALSE)
     {
+        render();
         drawText(1, 1, "Start a new game?\n"
                     "1) Yes, same settings\n"
                     "2) Yes, new settings\n"
@@ -96,7 +101,6 @@ int newGame()
             selection = TRUE;
             response = FALSE;
         }
-        render();
     }
     return response;
 }

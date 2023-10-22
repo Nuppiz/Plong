@@ -23,3 +23,9 @@ void render()
     // clear off-screen buffer so the screen updates properly
     _fmemset(screen_buf, 0, SCREEN_SIZE);
 }
+
+void renderWithoutClear()
+{     
+    // copy off-screen buffer to VGA memory
+    memcpy(VGA, screen_buf, SCREEN_SIZE);
+}

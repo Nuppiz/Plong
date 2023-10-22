@@ -1,8 +1,10 @@
 #include "Incl_std.h"
+#include "Def_draw.h"
 #include "Def_gen.h"
 #include "Def_game.h"
 #include "Def_vid.h"
 #include "Struct_g.h"
+#include "Draw.h"
 #include "Menu.h"
 #include "Text.h" // for debug
 
@@ -15,22 +17,22 @@ void ballInit(uint8_t server)
     Game.Ball.color = COLOR_YELLOW;
     if (server == LEFT)
     {
-        Game.Ball.pos.x = Game.Paddles[0].pos.x + BALL_DIAMETER;
-        Game.Ball.pos.y = Game.Paddles[0].pos.y;
+        Game.Ball.current_pos.x = Game.Paddles[0].current_pos.x + BALL_DIAMETER;
+        Game.Ball.current_pos.y = Game.Paddles[0].current_pos.y;
         Game.current_server = LEFT;
     }
     else if (server == RIGHT)
     {
-        Game.Ball.pos.x = Game.Paddles[1].pos.x - BALL_DIAMETER;
-        Game.Ball.pos.y = Game.Paddles[1].pos.y;
+        Game.Ball.current_pos.x = Game.Paddles[1].current_pos.x - BALL_DIAMETER;
+        Game.Ball.current_pos.y = Game.Paddles[1].current_pos.y;
         Game.current_server = RIGHT;
     }
 }
 
 void gameInit(uint8_t game_mode, uint8_t player_side)
 {
-    Game.Paddles[0].pos.x = PADDLE_WIDTH_HALF;
-    Game.Paddles[0].pos.y = COURT_HEIGHT / 2;
+    Game.Paddles[0].current_pos.x = PADDLE_WIDTH_HALF;
+    Game.Paddles[0].current_pos.y = COURT_HEIGHT / 2;
     Game.Paddles[0].vel.x = 0;
     Game.Paddles[0].vel.y = 0;
     Game.Paddles[0].color = COLOR_BLUE;
@@ -38,8 +40,8 @@ void gameInit(uint8_t game_mode, uint8_t player_side)
     Game.Paddles[0].side = LEFT;
     Game.Paddles[0].score = 0;
 
-    Game.Paddles[1].pos.x = COURT_WIDTH - PADDLE_WIDTH_HALF;
-    Game.Paddles[1].pos.y = COURT_HEIGHT / 2;
+    Game.Paddles[1].current_pos.x = COURT_WIDTH - PADDLE_WIDTH_HALF;
+    Game.Paddles[1].current_pos.y = COURT_HEIGHT / 2;
     Game.Paddles[1].vel.x = 0;
     Game.Paddles[1].vel.y = 0;
     Game.Paddles[1].color = COLOR_RED;
@@ -78,9 +80,9 @@ void gameInit(uint8_t game_mode, uint8_t player_side)
     default:
         break;
     }
+    drawField(COLOR_COURT_RED, COLOR_WHITE);
     ballInit(Game.current_server);
     Game.game_status = GAME_ONGOING;
-    drawText(1, 80, "Game init OK\n", COLOR_WHITE);
 }
 
 void ballReset(uint8_t server)
@@ -90,20 +92,22 @@ void ballReset(uint8_t server)
     Game.ball_served = FALSE;
     if (server == LEFT)
     {
-        Game.Ball.pos.x = Game.Paddles[0].pos.x + BALL_DIAMETER;
-        Game.Ball.pos.y = Game.Paddles[0].pos.y;
+        Game.Ball.current_pos.x = Game.Paddles[0].current_pos.x + BALL_DIAMETER;
+        Game.Ball.current_pos.y = Game.Paddles[0].current_pos.y;
         Game.current_server = LEFT;
     }
     else if (server == RIGHT)
     {
-        Game.Ball.pos.x = Game.Paddles[1].pos.x - BALL_DIAMETER;
-        Game.Ball.pos.y = Game.Paddles[1].pos.y;
+        Game.Ball.current_pos.x = Game.Paddles[1].current_pos.x - BALL_DIAMETER;
+        Game.Ball.current_pos.y = Game.Paddles[1].current_pos.y;
         Game.current_server = RIGHT;
     }
 }
 
 void addScore(uint8_t scoring_side)
 {
+    drawRectangle(120, 10, 22, 10, COLOR_COURT_RED);
+    drawRectangle(170, 10, 22, 10, COLOR_COURT_RED);
     if (scoring_side == LEFT_SCORES)
     {
         Game.Paddles[0].score++;

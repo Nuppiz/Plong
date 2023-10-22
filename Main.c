@@ -55,7 +55,7 @@ void gameLoop()
             }
         }
         drawLoop();
-        render();
+        renderWithoutClear();
         clearKeys();
         delay(50);
     }
@@ -69,7 +69,7 @@ void main()
         while (Game.game_status == NOT_IN_GAME && running == TRUE)
         {
             modeSelect();
-            render();
+            renderWithoutClear();
         }
         gameLoop();
     }

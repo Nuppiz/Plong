@@ -6,5 +6,6 @@
 
 void setVideoMode(uint8_t mode);
 void render();
+void renderWithoutClear();
 
 #endif /* VIDEO_H */

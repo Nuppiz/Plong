@@ -16,4 +16,7 @@
 #define PADDLE                      1
 #define BALL                        2
 
+#define NORMAL_MOVE                 0
+#define AI_SERVE                    1
+
 #endif /* DEF_MOVE_H */

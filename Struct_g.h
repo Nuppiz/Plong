@@ -9,7 +9,8 @@
 typedef struct
 {
     uint8_t type; // AI or player
-    Vec2_int pos;
+    Vec2_int current_pos;
+    Vec2_int prev_pos;
     Vec2_int vel;
     uint8_t color;
     uint8_t movement_bits;
@@ -19,7 +20,8 @@ typedef struct
 
 typedef struct
 {
-    Vec2_int pos;
+    Vec2_int current_pos;
+    Vec2_int prev_pos;
     Vec2_int vel;
     uint8_t color;
 } Ball_t;
