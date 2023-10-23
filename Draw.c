@@ -20,7 +20,7 @@ void drawField(uint8_t base_color, uint8_t line_color)
 {
     int x, y;
 
-    memset(screen_buf, base_color, SCREEN_SIZE);
+    _fmemset(screen_buf, base_color, SCREEN_SIZE);
 
     // top line first
     for (y = 0; y < FIELD_LINE_WIDTH; y++)
@@ -86,8 +86,8 @@ void drawField(uint8_t base_color, uint8_t line_color)
 // redraw parts of the field that are no longer occupied by the paddles and ball
 void redrawField(int x, int y, uint8_t redraw_type)
 {
-    int index_x = 0;
-    int index_y = 0;
+    int index_x;
+    int index_y;
 
     // given x and y is the middle point of the object, so these must be corrected first
     if (redraw_type == PADDLE)
@@ -157,8 +157,8 @@ void redrawField(int x, int y, uint8_t redraw_type)
 
 void drawPaddle(int x, int y, uint8_t color)
 {
-    int index_x = 0;
-    int index_y = 0;
+    int index_x;
+    int index_y;
 
     // given x and y is the middle point of the paddle, so these must be corrected first
     x -= PADDLE_WIDTH_HALF;
@@ -182,13 +182,12 @@ void drawPaddle(int x, int y, uint8_t color)
         x -= PADDLE_WIDTH_DRAW;
         y++;
     }
-    index_y = 0;
 }
 
 void drawBall(int x, int y, uint8_t color)
 {   
-    int index_x = 0;
-    int index_y = 0;
+    int index_x;
+    int index_y;
 
     // given x and y is the middle point of the ball, so these must be corrected first
     x -= BALL_RADIUS;
@@ -212,7 +211,6 @@ void drawBall(int x, int y, uint8_t color)
         x -= BALL_DIAMETER_DRAW;
         y++;
     }
-    index_y = 0;
 }
 
 void drawScore()
