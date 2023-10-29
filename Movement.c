@@ -5,6 +5,7 @@
 #include "Struct_g.h"
 #include "Draw.h"
 #include "Game.h"
+#include "Sounds.h"
 
 /* Movement and collision */
 
@@ -49,6 +50,7 @@ void ballPaddleDetect(Ball_t* ball)
                     ball->vel.y = y_diff;
                 if (y_diff <= 0) // ball is lower than paddle
                     ball->vel.y = -y_diff;
+                hitSound(); // make a sound
             }
         }
     }
@@ -66,6 +68,7 @@ void ballPaddleDetect(Ball_t* ball)
                     ball->vel.y = y_diff;
                 if (y_diff <= 0) // ball is lower than paddle
                     ball->vel.y = -y_diff;
+                hitSound(); // make a sound
             }
         }
     }
@@ -166,11 +169,13 @@ int ballEdgeDetect(Ball_t* ball)
     {
         ball->current_pos.y = 0 + BALL_RADIUS;
         ball->vel.y = -ball->vel.y;
+        hitSound(); // make a sound
     }
     if (ball->current_pos.y + BALL_RADIUS >= COURT_HEIGHT) // bottom edge
     {
         ball->current_pos.y = COURT_HEIGHT - BALL_RADIUS;
         ball->vel.y = -ball->vel.y;
+        hitSound(); // make a sound
     }
     return 0;
 }

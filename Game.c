@@ -6,7 +6,7 @@
 #include "Struct_g.h"
 #include "Draw.h"
 #include "Menu.h"
-#include "Text.h" // for debug
+#include "Sounds.h"
 
 extern Gamedata_t Game;
 
@@ -106,6 +106,7 @@ void ballReset(uint8_t server)
 
 void addScore(uint8_t scoring_side)
 {
+    scoreSound();
     drawRectangle(120, 10, 22, 10, COLOR_COURT_RED);
     drawRectangle(170, 10, 22, 10, COLOR_COURT_RED);
     if (scoring_side == LEFT_SCORES)

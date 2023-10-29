@@ -8,6 +8,7 @@
 #include "Struct_k.h"
 #include "Game.h"
 #include "Draw.h"
+#include "Sounds.h"
 #include "Text.h"
 #include "Video.h"
 
@@ -16,15 +17,18 @@ extern int running;
 
 void gameOver(uint8_t winner)
 {
+    endMusic();
     while (!KEY_WAS_HIT(KEY_ESC))
     {
         drawField(COLOR_COURT_RED, COLOR_WHITE);
         drawLoop();
         drawRectangle(80, 50, 160, 10, COLOR_BLACK);
+        drawRectangle(114, 60, 92, 10, COLOR_BLACK);
         if (winner == LEFT_WINS)
             drawText(87, 51, "LEFT SIDE WINS!", COLOR_WHITE);
         else if (winner == RIGHT_WINS)
             drawText(82, 51, "RIGHT SIDE WINS!", COLOR_WHITE);
+        drawText(116, 61, "PRESS ESC", COLOR_WHITE);
         render();
     }
 }
@@ -60,7 +64,8 @@ void modeSelect()
                     "2) Two players\n"
                     "3) AI-only\n"
                     "4) Exit game", COLOR_WHITE);
-
+    render();
+    
     if (KEY_WAS_HIT(KEY_1))
     {
         sideSelect(SINGLE_PLAYER);
